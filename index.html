@@ -5,6 +5,9 @@
 
   <title>alexyoung/select @ GitHub</title>
 
+  <link href="lib/prettify/prettify.css" type="text/css" rel="stylesheet" />
+  <script type="text/javascript" src="lib/prettify/prettify.js"></script>
+
   <style type="text/css">
     body {
       margin-top: 1.0em;
@@ -27,10 +30,64 @@
     pre { background: #000; color: #fff; padding: 15px;}
     hr { border: 0; width: 80%; border-bottom: 1px solid #aaa}
     .footer { text-align:center; padding-top:30px; font-style: italic; }
+
+    code { padding: 2px 4px; }
+
+    /* Pretty printing styles. Used with prettify.js. */
+    /* Vim sunburst theme by David Leibovic */
+
+    pre .str, code .str { color: #65B042; } /* string  - green */
+    pre .kwd, code .kwd { color: #E28964; } /* keyword - dark pink */
+    pre .com, code .com { color: #AEAEAE; font-style: italic; } /* comment - gray */
+    pre .typ, code .typ { color: #89bdff; } /* type - light blue */
+    pre .lit, code .lit { color: #3387CC; } /* literal - blue */
+    pre .pun, code .pun { color: #fff; } /* punctuation - white */
+    pre .pln, code .pln { color: #fff; } /* plaintext - white */
+    pre .tag, code .tag { color: #89bdff; } /* html/xml tag    - light blue */
+    pre .atn, code .atn { color: #bdb76b; } /* html/xml attribute name  - khaki */
+    pre .atv, code .atv { color: #65B042; } /* html/xml attribute value - green */
+    pre .dec, code .dec { color: #3387CC; } /* decimal - blue */
+
+    pre.prettyprint, code.prettyprint {
+      background-color: #111111;
+      -moz-border-radius: 8px;
+      -webkit-border-radius: 8px;
+      -o-border-radius: 8px;
+      -ms-border-radius: 8px;
+      -khtml-border-radius: 8px;
+      border-radius: 8px;
+    }
+
+    pre.prettyprint {
+      width: 95%;
+      margin: 1em auto;
+      padding: 1em;
+      white-space: pre-wrap;
+    }
+
+    /* Specify class=linenums on a pre to get line numbering */
+    ol.linenums { margin-top: 0; margin-bottom: 0; color: #AEAEAE; } /* IE indents via margin-left */
+    li.L0,li.L1,li.L2,li.L3,li.L5,li.L6,li.L7,li.L8 { list-style-type: none }
+    /* Alternate shading for lines */
+    li.L1,li.L3,li.L5,li.L7,li.L9 { }
+
+    @media print {
+      pre .str, code .str { color: #060; }
+      pre .kwd, code .kwd { color: #006; font-weight: bold; }
+      pre .com, code .com { color: #600; font-style: italic; }
+      pre .typ, code .typ { color: #404; font-weight: bold; }
+      pre .lit, code .lit { color: #044; }
+      pre .pun, code .pun { color: #440; }
+      pre .pln, code .pln { color: #000; }
+      pre .tag, code .tag { color: #006; font-weight: bold; }
+      pre .atn, code .atn { color: #404; }
+      pre .atv, code .atv { color: #060; }
+    }
+
   </style>
 </head>
 
-<body>
+<body onload="prettyPrint()">
   <a href="http://github.com/alexyoung/select"><img style="position: absolute; top: 0; right: 0; border: 0;" src="http://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub" /></a>
 
   <div id="container">
@@ -46,42 +103,92 @@
       <span class="small">by <a href="http://github.com/alexyoung">alexyoung</a></span></h1>
 
     <div class="description">
-      A JavaScript database library
+      A JavaScript database library 
     </div>
 
-    <p>`select` is a database library.
+    <p>Sick of ORM and schemas?  <code>select</code> gets right to the point!</p>
 
-Supported databases:
+    <p>Supported databases:</p>
+    <ul>
+      <li>MySQL</li>
+      <li>MongoDB</li>
+      <li>Memory</li>
+      <li>Planned: PostgreSQL, SQLite, CouchDB</li>
+      <li>Researching: Riak, Redis, selector language</li>
+    </ul>
 
-* MySQL
-* MongoDB
-* Memory
-* CouchDB (partial)
-* Planned: PostgreSQL, SQLite
-* Researching: Riak, Redis, selector language
-</p><h2>Dependencies</h2>
-<p># MongoDB
+    <h2>Dependencies</h2>
+    <p>
+      <strong>MongoDB</strong>:
+    </p>
+    <ul>
+      <li><a href="https://github.com/christkv/node-mongodb-native">github.com/christkv/node-mongodb-native</a></li>
+      <li>npm: <em>mongodb-native</em></li>
+    </ul>
 
-* https://github.com/christkv/node-mongodb-native
-* npm: _mongodb-native_
+    <p>
+      <strong>MySQL</strong>:
+    </p>
+    <ul>
+      <li><a href="https://github.com/felixge/node-mysql">github.com/felixge/node-mysql</a></li>
+      <li>npm: <em>mysql</em></li>
+    </ul>
 
-# MySQL
+    <p>
+      <strong>Testing</strong>:
+    </p>
+    <ul>
+      <li><a href="https://github.com/felixge/node-mysql">github.com/felixge/node-mysql</a></li>
+      <li>npm: <em>whiskey</em></li>
+    </ul>
 
-* https://github.com/felixge/node-mysql
-* npm: _mysql_
+    <h2>Install</h2>
+    <p><code>npm install select</code></p>
 
-# Testing
+    <h2>Examples</h2>
+    <pre class="prettyprint lang-js">
+  // Find some items and iterate
+  select('users')
+    .find({ name: 'Alex' })
+    .limit(3)
+    .offset(8)
+    .each(function(index) {
+      console.log(this);
+    });
 
-* npm: _whiskey_
-</p>
-<h2>Install</h2>
-<p>`npm install select`</p>
-<h2>License</h2>
-<p>The MIT License</p>
-<h2>Authors</h2>
-<p>Alex R. Young<br/><br/>      </p>
-<h2>Contact</h2>
-<p>http://alexyoung.org/contact.html</p>
+  // Update an attribute
+  select('users')
+    .find(17)
+    .attr({ name: 'Yuka' });
+
+  // Create
+  select('users')
+    .add({
+      name: 'Bob',
+      email: 'bob@example.com'
+    });
+
+  // Delete
+  select('users')
+    .find(1)
+    .del();
+
+  // Selector language
+  select('users[name="Alex", email="alex@example.com"]').
+    values(function(values) {});
+    </pre>
+
+    <h2>Documentation</h2>
+    <p><a href="api.html">API Documentation</a></p>
+
+    <h2>License</h2>
+    <p>The MIT License</p>
+
+    <h2>Authors</h2>
+    <p>Alex R. Young</p>
+
+    <h2>Contact</h2>
+    <p><a href="http://alexyoung.org/contact.html">Contact form</a>.</p>
 
 
     <h2>Download</h2>
@@ -92,15 +199,12 @@ Supported databases:
     </p>
     <p>You can also clone the project with <a href="http://git-scm.com">Git</a>
       by running:
-      <pre>$ git clone git://github.com/alexyoung/select</pre>
+      <pre class="prettyprint lang-sh">$ git clone git://github.com/alexyoung/select</pre>
     </p>
 
     <div class="footer">
       get the source code on GitHub : <a href="http://github.com/alexyoung/select">alexyoung/select</a>
     </div>
-
   </div>
-
-  
 </body>
 </html>
