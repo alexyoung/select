@@ -147,6 +147,9 @@
 
     <h2>Examples</h2>
     <pre class="prettyprint lang-js">
+  // Set the database connection string
+  select.db = 'mysql://root@localhost/select-test';
+
   // Find some items and iterate
   select('users')
     .find({ name: 'Alex' })
