@@ -1,0 +1,11 @@
+{
+  "name": "select",
+  "description": "A new kind of database library",
+  "homepage": "https://github.com/alexyoung/select",,
+  "version": "0.0.1",
+  "author": "Alex R. Young <alex@alexyoung.org>",
+  "repository": "git://github.com/alexyoung/select",
+  "main": "./index.js",
+  "engines": { "node": ">= 0.4.0" }
+}
+

@@ -1,0 +1,24 @@
+select('collection').
+  find(params).
+    count(100).
+    offset(10).
+    (attr|del|each) =>
+
+
+attr/del/each = execute (initiates chain parsing, then evaluates)
+
+stack =>
+  find params |
+  count       |
+  offset      |
+  del         |
+
+execution expression: del
+finder:               params + count + offset
+
+evaluates => bulk delete for params, count offset
+
+driver: bulkDelete:
+        SQL:     DELETE FROM collection WHERE params count offset
+        mongodb: delete based on values
+

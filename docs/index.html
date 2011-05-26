@@ -1,0 +1,577 @@
+<html>
+	<head>
+		<title>select</title>
+		<script src="http://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js"></script>
+		<style>body {
+    margin: 0;
+    padding: 0;
+    font: 14px/1.5 'Palatino Linotype', 'Book Antiqua', Palatino, FreeSerif, serif;
+    color: #252519;
+}
+a {
+    color: #252519;
+}
+a:hover {
+    text-decoration: underline;
+    color: #19469D;
+}
+p {
+    margin: 12px 0;
+}
+h1, h2, h3 {
+    margin: 0;
+    padding: 0;
+}
+table#source {
+    width: 100%;
+    border-collapse: collapse;
+}
+table#source td:first-child {
+    padding: 30px 40px 30px 40px;
+    vertical-align: top;
+}
+table#source td:first-child,
+table#source td:first-child pre {
+    width: 450px;
+}
+table#source td:last-child {
+    padding: 30px 0 30px 40px;
+    border-left: 1px solid #E5E5EE;
+    background: #F5F5FF;
+}
+table#source tr {
+    border-bottom: 1px solid #E5E5EE;
+}
+table#source tr.filename {
+    padding-top: 40px;
+    border-top: 1px solid #E5E5EE;
+}
+table#source tr.filename td:first-child {
+    text-transform: capitalize;
+}
+table#source tr.filename td:last-child {
+    font-size: 12px;
+}
+table#source tr.filename h2 {
+    margin: 0;
+    padding: 0;
+    cursor: pointer;
+}
+table#source tr.code h1,
+table#source tr.code h2,
+table#source tr.code h3 {
+    margin-top: 30px;
+    font-family: "Lucida Grande", "Helvetica Nueue", Arial, sans-serif;
+    font-size: 18px;
+}
+table#source tr.code h2 {
+    font-size: 16px;
+}
+table#source tr.code h3 {
+    font-size: 14px;
+}
+table#source tr.code ul {
+    margin: 15px 0 15px 35px;
+    padding: 0;
+}
+table#source tr.code ul li {
+    margin: 0;
+    padding: 1px 0;
+}
+table#source tr.code ul li p {
+    margin: 0;
+    padding: 0;
+}
+table#source tr.code td:first-child pre {
+    padding: 20px;
+}
+#ribbon {
+    position: fixed;
+    top: 0;
+    right: 0;
+}
+code .string { color: #219161; }
+code .regexp { color: #219161; }
+code .keyword { color: #954121; }
+code .number { color: #19469D; }
+code .comment { color: #bbb; }
+code .this { color: #19469D; }</style>
+		<script>
+			$(function(){
+				$('tr.code').hide();
+				$('tr.filename').toggle(function(){
+					$(this).nextUntil('.filename').fadeIn();
+				}, function(){
+					$(this).nextUntil('.filename').fadeOut();
+				});
+			});
+		</script>
+	</head>
+	<body>
+<table id="source"><tbody><tr><td><h1>select</h1><p><code>select</code> is a database library.</p>
+
+<h2>Installation</h2>
+
+<pre><code>  $ npm install select</code></pre>
+
+<h2>Examples</h2>
+
+<pre><code>  // Find some items and iterate
+  select('users')
+    .find({ name: 'Alex' })
+    .limit(3)
+    .offset(8)
+    .each(function(index) {
+      console.log(this);
+    });
+
+  // Update an attribute
+  select('users')
+    .find(17)
+    .attr({ name: 'Yuka' });
+
+  // Create
+  select('users')
+    .add({
+      name: 'Bob',
+      email: 'bob@example.com'
+    });
+
+  // Delete
+  select('users')
+    .find(1)
+    .del();
+
+  // Selector language
+  select('users[name="Alex", email="alex@example.com"]').
+    values(function(values) {});</code></pre>
+
+<h2>Philosophy</h2>
+
+<p><code>select</code> is:</p>
+
+<ul><li>A quick way of using common database features</li><li>Easy to learn for JavaScript developers</li><li>Easy to extend</li></ul>
+
+<p><code>select</code> is not:</p>
+
+<ul><li>Concerned with schema</li><li>An ORM</li><li>A validation library</li></ul>
+
+<h2>License</h2>
+
+<p>The MIT License</p>
+
+<p>Copyright (c) 2011 Alex R. Young</p></td><td></td></tr><tr class="filename"><td><h2 id="lib/select.js"><a href="#">select</a></h2></td><td>lib/select.js</td></tr><tr class="code">
+<td class="docs">
+<p> </p>
+</td>
+<td class="code">
+<pre><code><span class="keyword">var</span> <span class="variable">path</span> = <span class="variable">require</span>(<span class="string">'path'</span>),
+    <span class="class">Chain</span> = <span class="variable">require</span>(<span class="variable">path</span>.<span class="variable">join</span>(<span class="variable">__dirname</span>, <span class="string">'chain'</span>)),
+    <span class="variable">states</span> = <span class="variable">require</span>(<span class="variable">path</span>.<span class="variable">join</span>(<span class="variable">__dirname</span>, <span class="string">'states'</span>)),
+    <span class="variable">parser</span> = <span class="variable">require</span>(<span class="variable">path</span>.<span class="variable">join</span>(<span class="variable">__dirname</span>, <span class="string">'selector_parser'</span>)),
+    <span class="class">EventEmitter</span> = <span class="variable">require</span>(<span class="string">'events'</span>).<span class="class">EventEmitter</span>,
+    <span class="variable">events</span> = <span class="keyword">new</span> <span class="class">EventEmitter</span>();</code></pre>
+</td>
+</tr>
+<tr class="code">
+<td class="docs">
+<p>The main <code>select()</code> function.  Use <code>select('selector')</code> with a collection or table name to start a chain.</p>
+
+<h2></h2>
+
+<ul><li><p><strong>param</strong>: <em>String</em>  selector A selector.  For example, <code>'users'</code>, <code>'users[name="Alex"]'</code></p></li><li><p><strong>returns</strong>: <em>Object</em>  A <code>select</code> object that can be subsequently called with database operations</p></li></ul>
+</td>
+<td class="code">
+<pre><code><span class="variable">select</span> = <span class="keyword">function</span>(<span class="variable">selector</span>) {
+  <span class="keyword">return</span> <span class="keyword">new</span> <span class="variable">select</span>.<span class="variable">fn</span>.<span class="variable">init</span>(<span class="variable">selector</span>, <span class="variable">select</span>.<span class="variable">db</span>);
+};</code></pre>
+</td>
+</tr>
+<tr class="code">
+<td class="docs">
+<p>Set this with a database connection URI.  Examples:</p>
+
+<pre><code> select.db = 'mysql://root@localhost/select-test';
+ select.db = 'mongodb://localhost/select-test';</code></pre>
+
+<p> </p>
+</td>
+<td class="code">
+<pre><code><span class="variable">select</span>.<span class="variable">db</span> = <span class="keyword">null</span>;</code></pre>
+</td>
+</tr>
+<tr class="code">
+<td class="docs">
+<p>Use this to change the default primary key.
+ </p>
+</td>
+<td class="code">
+<pre><code><span class="variable">select</span>.<span class="variable">primaryKey</span> = <span class="keyword">null</span>;</code></pre>
+</td>
+</tr>
+<tr class="code">
+<td class="docs">
+<p>Access the underlying database library.  For example, with MySQL:</p>
+
+<pre><code>  select().raw('SELECT * FROM users',
+               function(err, results) {});</code></pre>
+
+<h2></h2>
+
+<ul><li><p><strong>param</strong>: <em>Object | String</em>  A query suitable for the underlying database API</p></li><li><p><strong>returns</strong>: <em>Object</em>  A <code>select</code> object</p></li></ul>
+</td>
+<td class="code">
+<pre><code><span class="variable">select</span>.<span class="variable">raw</span> = <span class="keyword">function</span>() {
+  <span class="keyword">var</span> <span class="variable">s</span> = <span class="keyword">new</span> <span class="variable">select</span>.<span class="variable">fn</span>.<span class="variable">init</span>(<span class="string">''</span>, <span class="variable">select</span>.<span class="variable">db</span>);
+  <span class="variable">s</span>.<span class="variable">raw</span>.<span class="variable">apply</span>(<span class="variable">s</span>, <span class="variable">arguments</span>);
+  <span class="keyword">return</span> <span class="variable">s</span>;
+};
+
+<span class="variable">select</span>.<span class="variable">on</span> = <span class="keyword">function</span>(<span class="variable">name</span>, <span class="variable">fn</span>) {
+  <span class="variable">events</span>.<span class="variable">on</span>(<span class="variable">name</span>, <span class="variable">fn</span>);
+};
+
+<span class="variable">select</span>.<span class="variable">emit</span> = <span class="keyword">function</span>(<span class="variable">name</span>, <span class="variable">param</span>) {
+  <span class="variable">events</span>.<span class="variable">emit</span>(<span class="variable">name</span>, <span class="variable">param</span>);
+}
+
+<span class="variable">select</span>.<span class="variable">states</span> = <span class="variable">states</span>;
+
+<span class="variable">select</span>.<span class="variable">fn</span> = <span class="variable">select</span>.<span class="variable">prototype</span> = {
+  <span class="variable">constructor</span>: <span class="variable">select</span>,
+
+  <span class="variable">init</span>: <span class="keyword">function</span>(<span class="variable">selector</span>, <span class="variable">db</span>) {
+    <span class="keyword">var</span> <span class="variable">s</span> = <span class="variable">parser</span>.<span class="variable">parse</span>(<span class="variable">selector</span>);
+    <span class="this">this</span>.<span class="variable">collection</span> = <span class="variable">s</span>.<span class="variable">collection</span>;
+    <span class="this">this</span>.<span class="variable">length</span> = <span class="number integer">0</span>;
+    <span class="this">this</span>.<span class="variable">chain</span> = <span class="keyword">new</span> <span class="class">Chain</span>(<span class="this">this</span>);
+    <span class="this">this</span>.<span class="variable">db</span> = <span class="variable">db</span>;
+    <span class="this">this</span>.<span class="variable">applyParsedTokens</span>(<span class="variable">s</span>);
+    <span class="keyword">return</span> <span class="this">this</span>;
+  },
+
+  <span class="variable">applyParsedTokens</span>: <span class="keyword">function</span>(<span class="variable">s</span>) {
+    <span class="keyword">if</span> (<span class="variable">s</span>.<span class="variable">find</span>) {
+      <span class="this">this</span>.<span class="variable">find</span>(<span class="variable">s</span>.<span class="variable">find</span>);
+    }
+  },
+
+  <span class="variable">emit</span>: <span class="keyword">function</span>(<span class="variable">name</span>, <span class="variable">param</span>) {
+    <span class="variable">select</span>.<span class="variable">emit</span>(<span class="variable">name</span>, <span class="variable">param</span>);
+  },
+
+  <span class="variable">primaryKey</span>: <span class="variable">select</span>.<span class="variable">primaryKey</span>,
+
+  <span class="variable">defaultPrimaryKeys</span>: {
+    <span class="variable">mysql</span>:   <span class="string">'id'</span>,
+    <span class="variable">mongodb</span>: <span class="string">'_id'</span>,
+    <span class="variable">memory</span>:  <span class="string">'id'</span>,
+    <span class="variable">couchdb</span>: <span class="string">'id'</span>   <span class="comment">// TODO</span>
+  },
+
+  <span class="variable">setValues</span>: <span class="keyword">function</span>(<span class="variable">values</span>) {
+    <span class="this">this</span>.<span class="variable">length</span> = <span class="variable">values</span>.<span class="variable">length</span>;
+    <span class="keyword">for</span> (<span class="keyword">var</span> <span class="variable">i</span> = <span class="number integer">0</span>; <span class="variable">i</span> &<span class="variable">lt</span>; <span class="variable">values</span>.<span class="variable">length</span>; <span class="variable">i</span>++) {
+      <span class="this">this</span>[<span class="variable">i</span>] = <span class="variable">values</span>[<span class="variable">i</span>];
+    }
+  },
+
+  <span class="variable">toArray</span>: <span class="keyword">function</span>() {
+    <span class="keyword">var</span> <span class="variable">values</span> = [];
+    <span class="keyword">for</span> (<span class="keyword">var</span> <span class="variable">i</span> = <span class="number integer">0</span>; <span class="variable">i</span> &<span class="variable">lt</span>; <span class="this">this</span>.<span class="variable">length</span>; <span class="variable">i</span>++) {
+      <span class="variable">values</span>.<span class="variable">push</span>(<span class="this">this</span>[<span class="variable">i</span>]);
+    }
+    <span class="keyword">return</span> <span class="variable">values</span>;
+  },</code></pre>
+</td>
+</tr>
+<tr class="code">
+<td class="docs">
+<p>Add a new record to the database.</p>
+
+<pre><code> select('users').
+   add({ name: 'Bill Adama' });</code></pre>
+
+<h2></h2>
+
+<ul><li><p><strong>param</strong>: <em>Object</em>  record An object containing values for a new record in the collection.</p></li><li><p><strong>param</strong>: <em>Function</em>  fn An optional callback</p></li><li><p><strong>returns</strong>: <em>Object</em>  The current <code>select</code> object</p></li></ul>
+</td>
+<td class="code">
+<pre><code><span class="variable">add</span>: <span class="keyword">function</span>(<span class="variable">record</span>, <span class="variable">fn</span>) {
+    <span class="keyword">var</span> <span class="variable">self</span> = <span class="this">this</span>;
+    <span class="this">this</span>.<span class="variable">chain</span>.<span class="variable">push</span>(<span class="variable">states</span>.<span class="variable">write</span>, <span class="keyword">function</span>(<span class="variable">client</span>, <span class="variable">next</span>) {
+      <span class="variable">client</span>.<span class="variable">add</span>(<span class="variable">self</span>.<span class="variable">collection</span>, <span class="variable">record</span>, <span class="variable">next</span>(<span class="variable">fn</span>));
+    });
+    <span class="keyword">return</span> <span class="this">this</span>;
+  },</code></pre>
+</td>
+</tr>
+<tr class="code">
+<td class="docs">
+<p>Modify attributes.</p>
+
+<pre><code> select('users').
+   find(1).
+   attr({ name: 'William Adama' });</code></pre>
+
+<h2></h2>
+
+<ul><li><p><strong>param</strong>: <em>Object</em>  record An object containing values for a new record in the collection.</p></li><li><p><strong>param</strong>: <em>Function</em>  fn An optional callback</p></li><li><p><strong>returns</strong>: <em>Object</em>  The current <code>select</code> object</p></li></ul>
+</td>
+<td class="code">
+<pre><code><span class="variable">attr</span>: <span class="keyword">function</span>(<span class="variable">record</span>, <span class="variable">fn</span>) {
+    <span class="keyword">var</span> <span class="variable">self</span> = <span class="this">this</span>;
+    <span class="this">this</span>.<span class="variable">chain</span>.<span class="variable">push</span>(<span class="variable">states</span>.<span class="variable">write</span> | <span class="variable">states</span>.<span class="variable">update</span>, <span class="keyword">function</span>(<span class="variable">client</span>, <span class="variable">next</span>) {
+      <span class="comment">// TODO: what about updating sets of records based on queries?</span>
+      <span class="keyword">var</span> <span class="variable">finishedCallbacks</span> = <span class="variable">self</span>.<span class="variable">length</span>;
+      <span class="keyword">function</span> <span class="variable">done</span>() {
+        <span class="variable">finishedCallbacks</span>--;
+        <span class="keyword">if</span> (<span class="variable">finishedCallbacks</span> == <span class="number integer">0</span>) {
+          <span class="keyword">if</span> (<span class="variable">fn</span>) <span class="variable">fn</span>();
+        }
+      }
+
+      <span class="keyword">for</span> (<span class="keyword">var</span> <span class="variable">i</span> = <span class="number integer">0</span>; <span class="variable">i</span> &<span class="variable">lt</span>; <span class="variable">self</span>.<span class="variable">length</span>; <span class="variable">i</span>++) {
+        <span class="variable">client</span>.<span class="variable">update</span>(<span class="variable">self</span>.<span class="variable">collection</span>, <span class="variable">self</span>[<span class="variable">i</span>], <span class="variable">record</span>, <span class="variable">done</span>);
+      }
+
+      <span class="keyword">if</span> (<span class="variable">self</span>.<span class="variable">length</span> === <span class="number integer">0</span> &<span class="variable">amp</span>;&<span class="variable">amp</span>; <span class="variable">fn</span>) <span class="variable">fn</span>();
+    });
+    <span class="keyword">return</span> <span class="this">this</span>;
+  },</code></pre>
+</td>
+</tr>
+<tr class="code">
+<td class="docs">
+<p>Delete the current set of values, or pass a delete query to bulk delete.</p>
+
+<p>Delete all:</p>
+
+<pre><code> select('users').del();</code></pre>
+
+<p>Delete by ID:</p>
+
+<pre><code> select('users').del(1);</code></pre>
+
+<p>Delete with a query:</p>
+
+<pre><code> select('users').del({ name: 'William Adama' });</code></pre>
+
+<p>Delete current set of values:</p>
+
+<pre><code> select('users').find({ type: 'trial' }).del();</code></pre>
+
+<h2></h2>
+
+<ul><li><p><strong>returns</strong>: <em>Object</em>  The current <code>select</code> object</p></li></ul>
+</td>
+<td class="code">
+<pre><code><span class="variable">del</span>: <span class="keyword">function</span>() {
+    <span class="comment">// FIXME: Value delete is causing problems, potentially just in mongodb</span>
+    <span class="keyword">var</span> <span class="variable">self</span> = <span class="this">this</span>,
+        <span class="variable">fn</span>,
+        <span class="variable">query</span> = <span class="keyword">null</span>;
+
+    <span class="keyword">if</span> (<span class="variable">arguments</span>.<span class="variable">length</span>) {
+      <span class="keyword">for</span> (<span class="keyword">var</span> <span class="variable">i</span> = <span class="number integer">0</span>; <span class="variable">i</span> &<span class="variable">lt</span>; <span class="variable">arguments</span>.<span class="variable">length</span>; <span class="variable">i</span>++) {
+        <span class="keyword">if</span> (<span class="keyword">typeof</span> <span class="variable">arguments</span>[<span class="variable">i</span>] === <span class="string">'function'</span>) {
+          <span class="variable">fn</span> = <span class="variable">arguments</span>[<span class="variable">i</span>];
+        } <span class="keyword">else</span> <span class="keyword">if</span> (<span class="keyword">typeof</span> <span class="variable">arguments</span>[<span class="variable">i</span>] === <span class="string">'object'</span>) {
+          <span class="variable">query</span> = <span class="variable">arguments</span>[<span class="variable">i</span>];
+        } <span class="keyword">else</span> <span class="keyword">if</span> (<span class="keyword">typeof</span> <span class="variable">arguments</span>[<span class="variable">i</span>] === <span class="string">'string'</span> || <span class="keyword">typeof</span> <span class="variable">arguments</span>[<span class="variable">i</span>] === <span class="string">'number'</span>) {
+          <span class="variable">query</span> = <span class="variable">arguments</span>[<span class="variable">i</span>];
+        }
+      }
+    }
+
+    <span class="keyword">if</span> (<span class="this">this</span>.<span class="variable">chain</span>.<span class="variable">stack</span>.<span class="variable">length</span> === <span class="number integer">0</span> &<span class="variable">amp</span>;&<span class="variable">amp</span>; !<span class="variable">query</span>) {
+      <span class="this">this</span>.<span class="variable">chain</span>.<span class="variable">push</span>(<span class="variable">states</span>.<span class="variable">write</span> | <span class="variable">states</span>.<span class="variable">update</span>, <span class="keyword">function</span>(<span class="variable">client</span>, <span class="variable">next</span>) {
+        <span class="variable">client</span>.<span class="variable">remove</span>(<span class="variable">self</span>.<span class="variable">collection</span>, <span class="variable">fn</span>);
+      });
+    } <span class="keyword">else</span> <span class="keyword">if</span> (<span class="variable">query</span>) {
+      <span class="this">this</span>.<span class="variable">find</span>(<span class="variable">query</span>);
+      <span class="this">this</span>.<span class="variable">del</span>(<span class="variable">fn</span>);
+    } <span class="keyword">else</span> {
+      <span class="this">this</span>.<span class="variable">chain</span>.<span class="variable">push</span>(<span class="variable">states</span>.<span class="variable">write</span> | <span class="variable">states</span>.<span class="variable">update</span>, <span class="keyword">function</span>(<span class="variable">client</span>, <span class="variable">next</span>) {
+        <span class="keyword">for</span> (<span class="keyword">var</span> <span class="variable">i</span> = <span class="number integer">0</span>; <span class="variable">i</span> &<span class="variable">lt</span>; <span class="variable">self</span>.<span class="variable">length</span>; <span class="variable">i</span>++) {
+          <span class="variable">client</span>.<span class="variable">remove</span>(<span class="variable">self</span>.<span class="variable">collection</span>, <span class="variable">self</span>[<span class="variable">i</span>], <span class="variable">fn</span>);
+        }
+        <span class="keyword">if</span> (<span class="variable">self</span>.<span class="variable">length</span> === <span class="number integer">0</span>) <span class="variable">client</span>.<span class="variable">close</span>();
+        <span class="variable">next</span>(<span class="variable">fn</span>);
+      });
+    }
+    <span class="keyword">return</span> <span class="this">this</span>;
+  },</code></pre>
+</td>
+</tr>
+<tr class="code">
+<td class="docs">
+<p>Find records.</p>
+
+<p>Find based on ID:
+     select('users').
+       find(1, function(err, values) {});</p>
+
+<p>Find based on attributes:
+     select('users').
+       find({ type: 'admin' }).
+       each(function() { console.log(this); });</p>
+
+<h2></h2>
+
+<ul><li><p><strong>returns</strong>: <em>Object</em>  The current <code>select</code> object</p></li></ul>
+</td>
+<td class="code">
+<pre><code><span class="variable">find</span>: <span class="keyword">function</span>(<span class="variable">options</span>, <span class="variable">fn</span>) {
+    <span class="keyword">var</span> <span class="variable">self</span> = <span class="this">this</span>;
+    <span class="this">this</span>.<span class="variable">chain</span>.<span class="variable">push</span>(<span class="variable">fn</span> ? (<span class="variable">states</span>.<span class="variable">read</span> | <span class="variable">states</span>.<span class="variable">exec</span> | <span class="variable">states</span>.<span class="variable">once</span>) : <span class="variable">states</span>.<span class="variable">read</span>, <span class="keyword">function</span>(<span class="variable">client</span>, <span class="variable">next</span>) {
+      <span class="variable">self</span>.<span class="variable">setValues</span>([]);
+      <span class="variable">client</span>.<span class="variable">find</span>(<span class="variable">self</span>.<span class="variable">collection</span>, <span class="variable">options</span>, <span class="variable">self</span>.<span class="variable">chain</span>.<span class="variable">readOptions</span>, <span class="variable">next</span>(<span class="keyword">function</span>(<span class="variable">err</span>, <span class="variable">values</span>) {
+        <span class="variable">self</span>.<span class="variable">setValues</span>(<span class="variable">values</span>);
+        <span class="keyword">if</span> (<span class="variable">fn</span>) <span class="variable">fn</span>(<span class="variable">err</span>, <span class="variable">values</span>);
+      }));
+    });
+    <span class="keyword">return</span> <span class="this">this</span>;
+  },</code></pre>
+</td>
+</tr>
+<tr class="code">
+<td class="docs">
+<p>Limit the next database find query.
+## TODO del/attr</p>
+
+<h2></h2>
+
+<ul><li><p><strong>param</strong>: <em>Number</em>  limit Limits the next find() by this amount</p></li><li><p><strong>returns</strong>: <em>Object</em>  The current <code>select</code> object</p></li></ul>
+</td>
+<td class="code">
+<pre><code><span class="variable">limit</span>: <span class="keyword">function</span>(<span class="variable">limit</span>) {
+    <span class="this">this</span>.<span class="variable">chain</span>.<span class="variable">push</span>(<span class="variable">states</span>.<span class="variable">read</span> | <span class="variable">states</span>.<span class="variable">modify</span>, { <span class="variable">limit</span>: <span class="variable">limit</span> });
+    <span class="keyword">return</span> <span class="this">this</span>;
+  },</code></pre>
+</td>
+</tr>
+<tr class="code">
+<td class="docs">
+<p>Offset the next database find query.
+## TODO del/attr</p>
+
+<h2></h2>
+
+<ul><li><p><strong>param</strong>: <em>Number</em>  offset Offset the next find() by this amount</p></li><li><p><strong>returns</strong>: <em>Object</em>  The current <code>select</code> object</p></li></ul>
+</td>
+<td class="code">
+<pre><code><span class="variable">offset</span>: <span class="keyword">function</span>(<span class="variable">offset</span>) {
+    <span class="this">this</span>.<span class="variable">chain</span>.<span class="variable">push</span>(<span class="variable">states</span>.<span class="variable">read</span> | <span class="variable">states</span>.<span class="variable">modify</span>, { <span class="variable">offset</span>: <span class="variable">offset</span> });
+    <span class="keyword">return</span> <span class="this">this</span>;
+  },</code></pre>
+</td>
+</tr>
+<tr class="code">
+<td class="docs">
+<p>Sorts the results of the next find.
+## TODO del/attr</p>
+
+<pre><code> select('users').
+   find().
+   sort('name').
+   each(function() { console.log(this); });</code></pre>
+
+<h2></h2>
+
+<ul><li><p><strong>returns</strong>: <em>Object</em>  The current <code>select</code> object</p></li></ul>
+</td>
+<td class="code">
+<pre><code><span class="variable">sort</span>: <span class="keyword">function</span>() {
+    <span class="this">this</span>.<span class="variable">chain</span>.<span class="variable">push</span>(<span class="variable">states</span>.<span class="variable">read</span> | <span class="variable">states</span>.<span class="variable">modify</span>, { <span class="variable">sort</span>: <span class="variable">arguments</span> });
+    <span class="keyword">return</span> <span class="this">this</span>;
+  },</code></pre>
+</td>
+</tr>
+<tr class="code">
+<td class="docs">
+<p>Causes the previous <code>find()</code> to run, and iterates over the results.
+In the passed in callback, <code>this</code> will refer to each value.</p>
+
+<pre><code> select('users').
+   find().
+   sort('name').
+   each(function() { console.log(this); });</code></pre>
+
+<h2></h2>
+
+<ul><li><p><strong>param</strong>: <em>Function</em>  fn A callback that will be run for each value</p></li><li><p><strong>returns</strong>: <em>Object</em>  The current <code>select</code> object</p></li></ul>
+</td>
+<td class="code">
+<pre><code><span class="variable">each</span>: <span class="keyword">function</span>(<span class="variable">fn</span>) {
+    <span class="this">this</span>.<span class="variable">chain</span>.<span class="variable">push</span>(<span class="variable">states</span>.<span class="variable">read</span> | <span class="variable">states</span>.<span class="variable">exec</span>, <span class="variable">fn</span>);
+    <span class="keyword">return</span> <span class="this">this</span>;
+  },</code></pre>
+</td>
+</tr>
+<tr class="code">
+<td class="docs">
+<p>Receives all of the values for the previous operations.
+When a query produces an empty set, <code>each</code> won't run, but <code>values</code> would.</p>
+
+<pre><code> select('users').
+   find().
+   sort('name').
+   values(function(err, values) { console.log(values); });</code></pre>
+
+<h2></h2>
+
+<ul><li><p><strong>param</strong>: <em>Function</em>  fn A callback that gets <code>err</code> and <code>values</code> </p></li><li><p><strong>returns</strong>: <em>Object</em>  The current <code>select</code> object</p></li></ul>
+</td>
+<td class="code">
+<pre><code><span class="variable">values</span>: <span class="keyword">function</span>(<span class="variable">fn</span>) {
+    <span class="keyword">var</span> <span class="variable">self</span> = <span class="this">this</span>;
+    <span class="this">this</span>.<span class="variable">chain</span>.<span class="variable">push</span>(<span class="variable">states</span>.<span class="variable">exec</span>, <span class="keyword">function</span>() {
+      <span class="keyword">if</span> (<span class="variable">fn</span>) <span class="variable">fn</span>(<span class="variable">self</span>.<span class="variable">toArray</span>());
+    }); 
+    <span class="keyword">return</span> <span class="this">this</span>;
+  },</code></pre>
+</td>
+</tr>
+<tr class="code">
+<td class="docs">
+<p>Causes the current chain to execute.
+   </p>
+</td>
+<td class="code">
+<pre><code><span class="variable">end</span>: <span class="keyword">function</span>(<span class="variable">fn</span>) {
+    <span class="this">this</span>.<span class="variable">chain</span>.<span class="variable">push</span>(<span class="variable">states</span>.<span class="variable">read</span> | <span class="variable">states</span>.<span class="variable">exec</span>, <span class="variable">fn</span>);
+    <span class="comment">// TODO: Is this right?</span>
+    <span class="keyword">return</span> <span class="variable">select</span>(<span class="this">this</span>.<span class="variable">collection</span>);
+  },</code></pre>
+</td>
+</tr>
+<tr class="code">
+<td class="docs">
+<p>This adds a callback to run once other database operations have finished.</p>
+
+<h2></h2>
+
+<ul><li><p><strong>param</strong>: <em>Function</em>  fn The callback</p></li><li><p><strong>returns</strong>: <em>Object</em>  The current <code>select</code> object</p></li></ul>
+</td>
+<td class="code">
+<pre><code><span class="variable">after</span>: <span class="keyword">function</span>(<span class="variable">fn</span>) {
+    <span class="this">this</span>.<span class="variable">chain</span>.<span class="variable">push</span>(<span class="variable">states</span>.<span class="variable">after</span>, <span class="variable">fn</span>);
+    <span class="keyword">return</span> <span class="this">this</span>;
+  },
+
+  <span class="variable">raw</span>: <span class="keyword">function</span>(<span class="variable">query</span>, <span class="variable">fn</span>) {
+    <span class="keyword">var</span> <span class="variable">self</span> = <span class="this">this</span>;
+    <span class="this">this</span>.<span class="variable">chain</span>.<span class="variable">push</span>(<span class="variable">states</span>.<span class="variable">write</span> | <span class="variable">states</span>.<span class="variable">update</span>, <span class="keyword">function</span>(<span class="variable">client</span>, <span class="variable">next</span>) {
+      <span class="variable">client</span>.<span class="variable">raw</span>(<span class="variable">query</span>, <span class="variable">fn</span>, <span class="variable">self</span>.<span class="variable">collection</span>, <span class="variable">next</span>);
+    });
+    <span class="keyword">return</span> <span class="this">this</span>;
+  }
+};
+
+<span class="variable">select</span>.<span class="variable">fn</span>.<span class="variable">init</span>.<span class="variable">prototype</span> = <span class="variable">select</span>.<span class="variable">fn</span>;
+<span class="variable">module</span>.<span class="variable">exports</span> = <span class="variable">select</span>;
+</code></pre>
+</td>
+</tr>	</body>
+</html></tbody></table>

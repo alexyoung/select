@@ -1,0 +1,101 @@
+var select = require('select'),
+    assert = require('assert');
+
+module.exports = {
+  'test init': function() {
+    assert.ok(select());
+  },
+
+  'test configuration': function() {
+    select.db = 'mysql://root@localhost/select-test';
+
+    select('users')
+      .find(17)
+      .attr({ name: 'Yuka' });
+
+    /*
+    select('users')
+      .add({
+        name: 'Bob',
+        email: 'bob@example.com'
+      });
+    */
+
+    /*
+    select('users')
+      .find(1)
+      .del();
+    */
+
+    /*
+    select('users')
+      .find({ name: 'Alex' })
+      .limit(3)
+      .offset(8)
+      .each(function(index) {
+        console.log(this);
+      });
+    */
+
+    //select.db = 'http://127.0.0.1:5984/select-test';
+
+    // TODO: what should the select argument be for couch?
+    //       views?
+    /*select('users/users')
+      .find('bd7182a007d6db0796ba1e6a5f000f1d')
+      .each(function(index) {
+        console.log('index:', index);
+        console.log('value:', this);
+      });
+    */
+
+    /*
+    select()
+      .add({
+        name: 'Alex',
+        email: 'alex@example.com',
+        created: new Date()
+      })
+      .find()
+      .each(function(index) {
+        console.log(this);
+      });
+    */
+
+    // select.db = 'mongodb://127.0.0.1/select-test';
+
+    /*select('users').add({
+        name: 'Alex',
+        email: 'alex@example.com',
+        created: new Date()
+      })
+      .find({ email: 'alex@example.com' })
+      .each(function(index) {
+        console.log(this);
+      });
+    */
+
+    /*select('users')
+      .find({ email: 'alex@example.com' })
+      .limit(7)
+      .sort('created', 'desc')
+      .each(function(i) {
+        console.log('item:', i, this);
+      });
+      */
+
+    /*
+    select('users')
+      .find({ email: 'alex@example.com' })
+      .limit(2)
+      .attr({ email: 'bob@example.com' });
+
+    select('users')
+      .find({ email: 'alex@example.com' })
+      .limit(1)
+      .del();
+    */
+  }
+};
+
+

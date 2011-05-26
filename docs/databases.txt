@@ -1,0 +1,32 @@
+COUCHDB
+
+* https://github.com/creationix/couch-client
+* Difficulty: high
+* select param: design/view name
+* TODO: is convienient searching on a key=value possible?
+
+MONGODB
+
+* https://github.com/christkv/node-mongodb-native
+* Difficulty: low
+* select param: selector language
+* TODO: find all, find int/string, offset, raw
+
+MYSQL
+
+* https://github.com/felixge/node-mysql
+* Difficulty: low
+* select param: selector language
+* TODO: tests
+
+POSTGRES
+
+* https://github.com/brianc/node-postgres
+
+REDIS
+
+RIAK
+
+SQLITE
+
+* https://github.com/pkrumins/node-sqlite

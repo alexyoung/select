@@ -1,0 +1,123 @@
+TODO:
+
+- plugin/middleware brainstorm
+- 'hooks' brainstorm
+- redis
+- count/sum operations (count should be value count, run async after finders)
+  select().
+    find().
+    count(fn) = value count
+
+  select().
+    count('expression', fn) = db count expression if available
+
+- mysql/memory/couch/etc. sort
+- can the scheduler accidentally re-run operations?
+- make add work with arrays
+- deleting with offset/limit
+- doing select('users').del(params) should do DELETE ... style deletes on all systems
+- doing select('users').find(...).del() should delete each record manually
+- update (attr) should work like this too
+- escape collection names?
+- bulk update
+
+* [done] Design the language for the API
+* [partly done] Model the 'stack' chain on jQuery (.end)
+* [done basics] couch
+* [done] Work out a stack-based state machine for holding state
+* [partly done] doing select('users').del() should do bulk delete for all database systems (except for couchdb)
+                should also accept parameters like SQL DELETE
+
+PHILOSOPHY
+
+  clean, cross-database API
+  familiar to JavaScript developers, influenced by popular libraries like jQuery
+  not ORM
+  doesn't provide validations, schema management, or migrations -- choice from other libraries
+
+WRITE OPERATIONS
+
+  create/add
+  update/attr
+  delete/del
+
+READ OPERATIONS
+
+  find/where
+
+  MODIFIERS
+    
+    limit
+    sort
+    offset
+
+COMBINED - READ TO WRITE
+
+  select('users')
+    .where({ age: { gt: 21 } })
+    .limit(20)
+    .attr({ access: true });
+
+    // Update all returned values to true
+    // Subsequent attr/del should be possible
+    // 'add' would just create a new value on the collection and ignore the current set of matches
+
+ACCESSING VALUES
+
+  each(fn)
+  first(fn)
+  last(fn)
+
+  // promises? http://api.jquery.com/promise/
+
+-- state transitions --
+
+read (read/modifiers) to write
+  - run read, get results, manipulate results
+
+read to modifier to read
+  - compile read with modifiers
+  - run
+  - apply read to results *** (may come later due to duplication of database finder logic in javascript)
+
+read to write to read
+  - write is not relevant
+
+read, end, read
+  - end jumps up to previous state
+
+-- stack state --
+
+'this' holds current state
+end can pop this to previous states
+
+...
+
+
+QUERY LANGUAGE MINI SPEC
+
+[spreadsheet]
+
+RECORDS
+
+* Should records be special objects?  This would be useful for mapping from things in setValues to performing operations like delete
+
+
+DEPENDENCIES
+
+(make these conditional based on settings)
+
+* TODO: Report error when library is not found
+
+https://github.com/creationix/couch-client
+http://wiki.apache.org/couchdb/CouchIn15Minutes
+http://sitr.us/2009/06/30/database-queries-the-couchdb-way.html
+http://wiki.apache.org/couchdb/HTTP_view_API
+http://blog.couchbase.com/moving-from-mysql-to-couchdb-part-1
+http://guide.couchdb.org/draft/cookbook.html
+http://guide.couchdb.org/editions/1/en/index.html
+http://wiki.apache.org/couchdb/HTTP_Bulk_Document_API
+
+TESTS
+
+https://github.com/cloudkick/whiskey
