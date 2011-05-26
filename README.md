@@ -17,6 +17,9 @@ Supported databases:
 
 ## Examples
 
+      // Set the database connection string
+      select.db = 'mysql://root@localhost/select-test';
+
       // Find some items and iterate
       select('users')
         .find({ name: 'Alex' })
