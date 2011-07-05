@@ -2,7 +2,7 @@
   "name": "select"
 , "description": "A new kind of database library"
 , "homepage": "http://selectjs.com"
-, "version": "0.1.0"
+, "version": "0.1.1"
 , "author": "Alex R. Young <alex@alexyoung.org>"
 , "repository": "git://github.com/alexyoung/select"
 , "main": "./index.js"
