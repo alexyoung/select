@@ -1,11 +1,17 @@
 {
-  "name": "select",
-  "description": "A new kind of database library",
-  "homepage": "http://selectjs.com",
-  "version": "0.1.0",
-  "author": "Alex R. Young <alex@alexyoung.org>",
-  "repository": "git://github.com/alexyoung/select",
-  "main": "./index.js",
-  "engines": { "node": ">= 0.4.0" }
+  "name": "select"
+, "description": "A new kind of database library"
+, "homepage": "http://selectjs.com"
+, "version": "0.1.0"
+, "author": "Alex R. Young <alex@alexyoung.org>"
+, "repository": "git://github.com/alexyoung/select"
+, "main": "./index.js"
+, "engines": { "node": ">= 0.4.0" }
+, "devDependencies": {
+    "mongodb": "0.9.x"
+  , "whiskey": "0.3.x"
+  , "couch-client": ">= 0.0.4"
+  , "mysql": "0.9.x"
+  }
 }
 
