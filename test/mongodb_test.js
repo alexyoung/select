@@ -3,7 +3,7 @@ var select = require('select'),
 
 function fixtures(collection, fn) {
   select(collection).raw(function(c, next) {
-    c.remove();
+    c.remove(function() {});
     next();
 
     select(collection).
@@ -185,15 +185,17 @@ exports['test find with default sort'] = function(test, assert) {
 };
 
 exports['test delete'] = function(test, assert) {
-  select('users').
-    find(exampleID.toString()).
-    del(function() {
-      select('users').
-        find(exampleID.toString(), function(err, values) {
-          assert.equal(0, values.length);
-          test.finish();
-        });
-    });
+  fixtures('users4', function() {
+    select('users4').
+      find({ 'name': 'Alex' }).
+      del(function() {
+        select('users4').
+          find({ 'name': 'Alex' }, function(err, values) {
+            assert.equal(0, values.length);
+            test.finish();
+          });
+      });
+  });
 };
 
 exports['test delete with query'] = function(test, assert) {
