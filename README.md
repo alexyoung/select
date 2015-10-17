@@ -13,7 +13,7 @@ Supported databases:
 
 ## Installation
 
-      $ npm install select
+(Note that this module is not supported, and the old npm repository has been transferred to npm user zenorocha)
 
 ## Examples
 
